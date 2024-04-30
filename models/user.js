@@ -8,7 +8,6 @@ module.exports = (sequelize, Sequelize) => {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-
       username: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -22,6 +21,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING, 
         allowNull: false,
       },
+      userType: {
+        type: Sequelize.ENUM('client', 'freelancer'), 
+
+      }
     },
     {
       timestamps: true,
