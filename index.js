@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const logger = require("morgan");
 const cors = require("cors");
-// const { db } = require("./src/models");
+const { db } = require("./src/models");
 const indexRouter = require("./src/routes/api");
 
 app.use(logger("dev"));
@@ -18,19 +18,20 @@ app.use("/api", indexRouter);
 
 // Routes
 app.get("/", (req, res) => {
-  res.send({ success: true, message: "Welcome to Bidding server!" }); 
+  res.send({ success: true, message: "Welcome to Bidding server!" });
 });
 
-// db.sequelize
-//   .sync()
-//   .then(() => {
-//     console.log("Synced db.");
-//   })
-//   .catch((err) => {
-//     console.log("Failed to sync db: " + err.message);
-//   });
-
+db.sequelize
+  .sync()
+  .then(() => {
+    console.log("Synced db.");
+  })
+  .catch((err) => {
+    console.log("Failed to sync db: " + err);
+  });
+ 
 const PORT = process.env.PORT || 8000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });

@@ -8,27 +8,29 @@ const sequelize = new Sequelize(
   config.env.development.password,
   {
     host:  config.env.development.host,
-    dialect:  config.env.development.dialect
+    dialect:  config.env.development.dialect,
+    sslmode: config.env.development.sslmode,
   }
 );
 
-const sequelizeProd = new Sequelize(
-    config.env.production.database,
-    config.env.production.username,
-    config.env.production.password,
-    {
-      host:  config.env.production.host,
-      dialect:  config.env.production.dialect
-    }
-  );
+// const sequelizeProd = new Sequelize(
+//     config.env.production.database,
+//     config.env.production.username,
+//     config.env.production.password,
+//     {
+//       host:  config.env.production.host,
+//       dialect:  config.env.production.dialect
+
+//     }
+//   );
 
 const db = {};
-const proddb = {}
+// const proddb = {}
 
 db.sequelize = sequelize
-proddb.sequelize =  sequelizeProd
+// proddb.sequelize =  sequelizeProd
 
 
 db.User = require('../models/user')(sequelize, Sequelize)
 
-module.exports = { db , proddb };
+module.exports = { db };
