@@ -33,7 +33,7 @@ const signupUser = async (req, res) => {
     }
     var userType = req.body.userType;
     
-    if (!userType) userType = "freelancer";
+    if (!userType) userType = "FREELANCER";
 
     // Validate password
     const passwordValidationMessage = validatePassword(password);
@@ -103,7 +103,7 @@ const loginUser = async (req, res) => {
       console.log(`Attempted login with email: ${email}`);
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials, please check your email!",
+        message: "Invalid credentials, please check your email!", 
       });
     }
 
@@ -121,7 +121,7 @@ const loginUser = async (req, res) => {
     const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
     res.status(200).json({
       success: true,
-      message: `${user.dataValues.name} logged in successfully!`,
+      message: `${user.dataValues.username} logged in successfully!`,
       accessToken,
       user,
     });
@@ -133,100 +133,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
-  try {
-    const { name, email, password, profile_picture } = req.body;
-    const userId = req.id;
-
-    const user = await User.findByPk(userId);
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-
-    // Check if email or phone number is being updated
-    if (email && email !== user.email) {
-      // If email is being updated, check if it already exists for another user
-      const existingEmailUser = await User.findOne({ where: { email } });
-      if (existingEmailUser && existingEmailUser.id !== userId) {
-        return res.status(400).json({
-          success: false,
-          message: "Email already exists for another user",
-        });
-      }
-    }
-
-    if (phone_number && phone_number !== user.phone_number) {
-      // If phone number is being updated, check if it already exists for another user
-      const existingPhoneUser = await User.findOne({ where: { phone_number } });
-      if (existingPhoneUser && existingPhoneUser.id !== userId) {
-        return res.status(400).json({
-          success: false,
-          message: "Phone number already exists for another user",
-        });
-      }
-    }
-
-    // Update user information
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (phone_number) user.phone_number = phone_number;
-    if (profile_picture) user.profile_picture = profile_picture;
-
-    if (email && !isValidEmail(email)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid email format" });
-    }
-
-    // Check if phone number is valid
-    if (phone_number && !isValidPhoneNumber(phone_number)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid phone number format" });
-    }
-
-    // Update password if provided
-    if (password) {
-      // Validate password
-      const passwordValidationMessage = validatePassword(password);
-      if (passwordValidationMessage) {
-        return res
-          .status(400)
-          .json({ success: false, message: passwordValidationMessage });
-      }
-
-      // Hash the new password
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
-    }
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "User information updated successfully",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        phone_number: user.phone_number,
-        profile_picture: user.profile_picture,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    });
-  } catch (error) {
-    console.error("Error updating user information:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-module.exports = { signupUser, loginUser, updateUser };
+module.exports = { signupUser, loginUser };

@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
       },
       userType: {
-        type: Sequelize.ENUM('client', 'freelancer'), 
+        type: Sequelize.ENUM('CLIENT', 'FREELANCER'), 
 
       }
     },
