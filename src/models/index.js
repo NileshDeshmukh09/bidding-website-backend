@@ -28,14 +28,6 @@ const proddb = {}
 db.sequelize = sequelize
 proddb.sequelize =  sequelizeProd
 
-db.sequelize
-  .sync()
-  .then(() => {
-    console.log("Synced db.");
-  })
-  .catch((err) => {
-    console.log("Failed to sync db: " + err.message);
-  });
 
 db.User = require('../models/user')(sequelize, Sequelize)
 
