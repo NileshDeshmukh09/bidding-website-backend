@@ -4,8 +4,8 @@ const express = require("express");
 const app = express();
 const logger = require("morgan");
 const cors = require("cors");
-const { db } = require("./models");
-const indexRouter = require("./routes/api");
+const { db } = require("./src/models");
+const indexRouter = require("./src/routes/api");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -21,7 +21,6 @@ app.get("/", (req, res) => {
   res.send({ success: true, message: "Welcome to Bidding server!" });
 });
 
-// Sync sequelize models and then start express server
 db.sequelize
   .sync()
   .then(() => {
