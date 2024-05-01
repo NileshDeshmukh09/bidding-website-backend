@@ -21,14 +21,7 @@ app.get("/", (req, res) => {
   res.send({ success: true, message: "Welcome to Bidding server!" });
 });
 
-db.sequelize
-  .sync()
-  .then(() => {
-    console.log("Synced db.");
-  })
-  .catch((err) => {
-    console.log("Failed to sync db: " + err.message);
-  });
+
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
