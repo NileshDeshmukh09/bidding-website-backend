@@ -35,6 +35,11 @@ const isValidEmail = (email) => {
     // If all validations pass, return null
     return null;
   };
+
+  const isValidCompanySize = (size) => {
+    const validSizes = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001+'];
+    return validSizes.includes(size);
+  };
   
-  module.exports = { validatePassword , isValidEmail , isValidPhoneNumber };
+  module.exports = { validatePassword , isValidEmail , isValidPhoneNumber , isValidCompanySize};
   

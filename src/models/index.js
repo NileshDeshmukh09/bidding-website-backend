@@ -31,6 +31,8 @@ db.sequelize = sequelize
 // proddb.sequelize =  sequelizeProd
 
 
-db.User = require('../models/user')(sequelize, Sequelize)
+db.User = require('../models/user')(sequelize, Sequelize);
+db.Freelancer = require('../models/freelancer')(sequelize, Sequelize);
+db.Client = require('../models/client')(sequelize, Sequelize);
 
 module.exports = { db };

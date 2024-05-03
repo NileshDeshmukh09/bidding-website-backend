@@ -6,6 +6,12 @@ const logger = require("morgan");
 const cors = require("cors");
 const { db } = require("./src/models");
 const indexRouter = require("./src/routes/api");
+// const https = require('https');
+// const fs = require('fs');
+
+const PORT = process.env.PORT || 8000; 
+
+
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -30,7 +36,7 @@ db.sequelize
     console.log("Failed to sync db: " + err);
   });
  
-const PORT = process.env.PORT || 8000;
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
