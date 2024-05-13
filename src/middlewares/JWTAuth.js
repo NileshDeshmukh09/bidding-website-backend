@@ -44,4 +44,16 @@ const isClient = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, isClient };
+const isFreelancer = async (req, res, next) => {
+    const user = await User.findOne({ where: { id: req.id } });
+  
+    if (user && user.userType == userTypes.freelancer) {
+      console.log("This is Freelancer User !");
+      next();
+    } else {
+      return res.status(403).send({
+        message: "Require Freelancer Role",
+      });
+    }
+  };
+module.exports = { verifyToken, isClient , isFreelancer };

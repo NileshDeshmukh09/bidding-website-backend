@@ -48,13 +48,13 @@ db.Job.belongsTo(db.Client, {
   as: "Client",
 });
 
-db.Job.hasMany(db.Proposals, {
-  foreignKey: "jobId",
-  as: "Job",
+db.Freelancer.hasMany(db.Proposals, {
+  foreignKey: "freelancerId",
+  as: "Proposals",
 });
-db.Proposals.belongsTo(db.Job, {
-  foreignKey: "jobId",
-  as: "Client",
+db.Proposals.belongsTo(db.Freelancer, {
+  foreignKey: "freelancerId",
+  as: "Freelancer",
 });
 
 module.exports = { db };

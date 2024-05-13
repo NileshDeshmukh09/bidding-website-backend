@@ -26,7 +26,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         coverLetter: {
           type : Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
       },
       {
