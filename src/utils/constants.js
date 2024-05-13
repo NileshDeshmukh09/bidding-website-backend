@@ -16,12 +16,12 @@ module.exports = {
         expert : "Expert"
     },
 
-    ticketStatus : {
-        open : "OPEN",
-        closed : "CLOSED",
-        blocked : "BLOCKED",
-        inProgress : "IN_PROGRESS",
-    },
+    scope : {
+        large : "large",
+        medium : "medium",
+        small : "small"
+    }
+
 
    
 
