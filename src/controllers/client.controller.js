@@ -33,6 +33,15 @@ const createClient = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
+    const client = await Client.findOne({ where: { userId } });
+
+    if (client) {
+      return res.status(400).json({
+        success: false,
+        message: "User already has a CLIENT profile",
+      });
+    }
+
     if (user.userType !== userTypes.client) {
       return res
         .status(401)
