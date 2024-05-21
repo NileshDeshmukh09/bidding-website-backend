@@ -24,6 +24,12 @@ module.exports = (sequelize, Sequelize) => {
         websiteURL : {
           type: Sequelize.STRING,
           allowNull: true,
+        }, 
+
+        totalFundingin$ : {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          defaultValue: 1000,
         }
       },
       {

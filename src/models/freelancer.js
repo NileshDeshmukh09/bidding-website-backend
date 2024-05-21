@@ -22,6 +22,12 @@ module.exports = (sequelize, Sequelize) => {
           allowNull: false,
           defaultValue: 'Beginner',
         },
+
+        amountCredited : {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          defaultValue: 0,
+        }
       },
       {
         timestamps: true,

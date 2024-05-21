@@ -100,11 +100,11 @@ const getFreelancerById = async (req, res) => {
         .json({ success: false, message: "Freelancer ID not found" });
     }
 
-    if (freelancer.userId !== req.id) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized access" });
-    }
+    // if (freelancer.userId !== req.id) {
+    //   return res
+    //     .status(401)
+    //     .json({ success: false, message: "Unauthorized access" });
+    // }
 
     res.status(200).json({ success: true, freelancer });
   } catch (error) {

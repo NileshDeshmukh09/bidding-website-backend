@@ -12,5 +12,5 @@ router.use("/auth" , authRouter);
 router.use("/user/freelancers" , freelancerRoutes);
 router.use("/user/clients" , ClientRoutes);
 router.use("/jobs" , jobRoutes);
-router.use("/proposals" , proposalRoutes);
+router.use("/proposals" , proposalRoutes); 
 module.exports = router;

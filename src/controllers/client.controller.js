@@ -7,7 +7,7 @@ const User = db.User;
 // Create a new Client
 const createClient = async (req, res) => {
   try {
-    const { companyName, companySize, websiteURL } = req.body;
+    const { companyName, companySize, websiteURL , totalFundingin$ } = req.body;
 
     const userId = req.id;
 
@@ -25,6 +25,13 @@ const createClient = async (req, res) => {
           message: "company name, and company size are required",
         });
     }
+
+    // if( !totalFundingin$ ){
+    //   return res.status(400).json({
+    //     success : false, 
+    //     message : "Oops! , You missed to enter the funded amount for the Company!"
+    //   })
+    // }
 
     const user = await User.findOne({ where: { id: userId } });
     if (!user) {
@@ -64,7 +71,8 @@ const createClient = async (req, res) => {
       userId,
       companyName,
       companySize,
-      websiteURL,
+      websiteURL, 
+      totalFundingin$,
     });
 
     res.status(201).json({

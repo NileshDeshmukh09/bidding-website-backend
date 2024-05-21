@@ -2,6 +2,7 @@ const { db } = require("../models");
 const User = db.User;
 const Job = db.Job;
 const Client = db.Client;
+const Escrow = db.Escrow;
 const {
   validateProjectScope,
   validateExperience,
@@ -101,6 +102,15 @@ const createJob = async (req, res) => {
     validateExperience(experience);
     validateBudget(budget);
 
+    if (budget && budget > client.totalFundingin$) {
+
+      console.log("budget-------- : ", typeof budget , typeof client.totalFundingin$);
+      return res.status(400).json({
+        success: false,
+        message: "Can't create a Job , Job Budget is Greater than Funding!",
+      });
+    }
+
     // Create the job
     const newJob = await Job.create({
       clientId: client.id,
@@ -114,12 +124,49 @@ const createJob = async (req, res) => {
       description,
     });
 
-    // Respond with success message and the created job
-    res.status(201).json({
-      success: true,
-      message: "Job posted successfully!",
-      job: newJob,
-    });
+    // NOTE - payment Integration part will create soon
+    let isPaymentSuccessfull = true;
+
+    if (isPaymentSuccessfull) {
+      // Create Escrow Entry
+
+      const remainingFundingAmount = client.totalFundingin$ - newJob.budget;
+      const newEscrow = await Escrow.create({
+        clientId: client.id,
+        jobId: newJob.id,
+        JobStatus: "PUBLISHED",
+        amount: newJob.budget, //
+        freelancerId: null, // Update if a freelancer is assigned immediately
+        freelancerWorkStatus: "NOT STARTED",
+      });
+
+      client.totalFundingin$ = remainingFundingAmount;
+
+      await client.save();
+
+      console.log("Client :", client);
+
+      // Respond with success message and the created job
+      res.status(201).json({
+        success: true,
+        message: "Job posted successfully!",
+        job: newJob,
+      });
+    } else {
+      await Escrow.create({
+        clientId: client.id,
+        jobId: newJob.id,
+        JobStatus: "DRAFT",
+        amount: 0,
+        freelancerId: null, // Update if a freelancer is assigned immediately
+        freelancerWorkStatus: "NOT STARTED",
+      });
+
+      res.status(400).json({
+        success: false,
+        message: "Oops!, Add AMOUNT in Escrow to Publish the Job !!",
+      });
+    }
   } catch (error) {
     console.error("Error creating job:", error.message);
     res.status(400).json({ success: false, message: error.message });
@@ -130,23 +177,19 @@ const createJob = async (req, res) => {
 const getAllJobs = async (req, res) => {
   try {
     const jobs = await Job.findAll();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Jobs fetched successfully",
-        TotalJobs: jobs.length,
-        jobs,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Jobs fetched successfully",
+      TotalJobs: jobs.length,
+      jobs,
+    });
   } catch (error) {
     console.error("Error fetching jobs:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 
@@ -164,13 +207,11 @@ const getJobById = async (req, res) => {
     res.status(200).json({ success: true, job });
   } catch (error) {
     console.error("Error fetching job by ID:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 
@@ -185,25 +226,21 @@ const getJobByClientID = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Client not found" });
     }
-    const jobs = await Job.findAll({ where:{ clientId }});
+    const jobs = await Job.findAll({ where: { clientId } });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Job fetched successfully!",
-        TotalJobs: jobs.length,
-        jobs,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Job fetched successfully!",
+      TotalJobs: jobs.length,
+      jobs,
+    });
   } catch (error) {
     console.error("Error fetching job by ID:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 

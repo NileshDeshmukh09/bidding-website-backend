@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
           },
         description: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           allowNull: false,
         },
         deadline: {
@@ -21,13 +21,20 @@ module.exports = (sequelize, Sequelize) => {
           allowNull: true,
         },
         charges : {
-          type: Sequelize.STRING, 
-          allowNull: false, 
+          type: Sequelize.DECIMAL(10, 2),
+          allowNull: true,
+          defaultValue: 0, 
         },
         coverLetter: {
           type : Sequelize.STRING,
           allowNull: true,
         },
+        status : {
+          type : Sequelize.ENUM('PENDING', 'ACCEPTED', 'REJECTED' , 'COMPLETED'), 
+          allowNull: false, 
+          defaultValue: 'PENDING',
+        },
+        
       },
       {
         timestamps: true,

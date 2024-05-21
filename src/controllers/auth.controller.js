@@ -133,4 +133,42 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { signupUser, loginUser };
+const getUserById = async (req, res) => {
+  try {
+    // Extract user ID from request parameters
+    const { id } = req.params;
+
+    // Validate the ID format (assuming it's a numeric ID)
+    
+
+    // Find the user in the database by ID
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ['password'] } // Exclude the password field from the response
+    });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Respond with user data
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error,
+    });
+  }
+};
+
+
+
+module.exports = { signupUser, loginUser , getUserById };
