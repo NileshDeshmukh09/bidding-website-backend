@@ -160,10 +160,29 @@ const deleteClientById = async (req, res) => {
       .json({ success: false, message: "Internal server error", error });
   }
 };
+
+const getClientByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const client = await Client.findOne({ where: { userId } });
+
+    if (!client) {
+      return res.status(404).json({ success: false, message: "Client not found for the given User ID" });
+    }
+
+    res.status(200).json({ success: true, client });
+  } catch (error) {
+    console.error("Error fetching Client by User ID:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
  
 module.exports = {
   createClient,
   getAllClients,
   getClientById,
   deleteClientById,
+  getClientByUserId
 };

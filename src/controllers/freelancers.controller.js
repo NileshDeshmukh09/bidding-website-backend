@@ -113,6 +113,23 @@ const getFreelancerById = async (req, res) => {
   }
 };
 
+const getFreelancerByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const freelancer = await Freelancer.findOne({ where: { userId } });
+
+    if (!freelancer) {
+      return res.status(404).json({ success: false, message: "Freelancer not found for the given User ID" });
+    }
+
+    res.status(200).json({ success: true, freelancer });
+  } catch (error) {
+    console.error("Error fetching Freelancer by User ID:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 // Delete a Freelancer by ID
 const deleteFreelancerById = async (req, res) => {
   const { id } = req.params;
@@ -148,4 +165,5 @@ module.exports = {
   getFreelancers,
   getFreelancerById,
   deleteFreelancerById,
+  getFreelancerByUserId,
 };
