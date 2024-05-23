@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
           allowNull: true,
         },
         charges : {
-          type: Sequelize.DECIMAL(10, 2),
+          type: Sequelize.INTEGER,
           allowNull: true,
           defaultValue: 0, 
         },
