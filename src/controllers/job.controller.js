@@ -173,7 +173,16 @@ const createJob = async (req, res) => {
 // Get all jobs
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.findAll({
+    // Get page, limit, and experience from query params, set default values if not provided
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const experience = req.query.experience;
+    const offset = (page - 1) * limit;
+
+    // Build the query options
+    const queryOptions = {
+      limit,
+      offset,
       include: {
         model: db.Client,
         attributes: [
@@ -190,11 +199,26 @@ const getAllJobs = async (req, res) => {
           as: "User",
         },
       },
-    });
+    };
+
+    // Add experience filter if provided
+    if (experience) {
+      queryOptions.where = { experience };
+    }
+
+    // Fetch jobs with pagination and filtering
+    const { count, rows: jobs } = await Job.findAndCountAll(queryOptions);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(count / limit);
+
     res.status(200).json({
       success: true,
       message: "Jobs fetched successfully",
-      TotalJobs: jobs.length,
+      TotalJobs: count,
+      currentPage: page,
+      pageSize: limit,
+      totalPages,
       jobs,
     });
   } catch (error) {
@@ -206,6 +230,8 @@ const getAllJobs = async (req, res) => {
     });
   }
 };
+
+
 
 // Get a job by ID
 const getJobById = async (req, res) => {
