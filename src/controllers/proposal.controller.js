@@ -9,7 +9,7 @@ const multer = require("multer");
 const multerS3 = require("multer-s3");
 const AWS = require("aws-sdk");
 
-const { sendEmail } = require('../utils/emailService')
+const { sendEmail } = require("../utils/emailService");
 
 AWS.config.update({
   accessKeyId: process.env.ACCESS_KEY,
@@ -24,7 +24,6 @@ const upload = multer({
     s3,
     bucket: process.env.S3_BUCKET,
     key: function (req, file, cb) {
-      
       cb(null, Date.now().toString() + "-" + file.originalname);
     },
   }),
@@ -46,7 +45,12 @@ const createProposal = async (req, res) => {
 
       const { description, jobId, deadline, charges } = req.body;
       // console.log("Load  :", req.file, req.body);
-      console.log("fileAccess : ",  process.env.ACCESS_KEY , process.env.SECRET_ACCESS_KEY , process.env.S3_BUCKET);
+      console.log(
+        "fileAccess : ",
+        process.env.ACCESS_KEY,
+        process.env.SECRET_ACCESS_KEY,
+        process.env.S3_BUCKET
+      );
 
       if (!description) {
         return res
@@ -139,7 +143,27 @@ const getProposalById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const proposal = await Proposal.findByPk(id);
+    const proposal = await Proposal.findOne({
+      where: { id },
+      include: [
+        {
+          model: db.Job,
+          attributes: ["id", "title", "skills", "budget", "description"],
+          as: "Job",
+        },
+
+        {
+          model: db.Freelancer,
+          attributes: ["id", "amountCredited", "skills"],
+          as: "Freelancer",
+          include: {
+            model: db.User,
+            attributes: ["id", "username", "email"],
+            as: "User",
+          },
+        },
+      ],
+    });
 
     if (!proposal) {
       return res
@@ -171,7 +195,19 @@ const getProposalByFreelancerID = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Freelancer not found" });
     }
-    const Proposals = await Proposal.findAll({ where: { freelancerId } });
+    const Proposals = await Proposal.findAll({
+      where: { freelancerId },
+      include: {
+        model: db.Freelancer,
+        attributes: ["id", "amountCredited", "skills"],
+        as: "Freelancer",
+        include: {
+          model: db.User,
+          attributes: ["id", "username", "email"],
+          as: "User",
+        },
+      },
+    });
 
     res.status(200).json({
       success: true,
@@ -194,7 +230,9 @@ const getProposalsByJobId = async (req, res) => {
   const { jobId } = req.params;
 
   try {
-    const job = await Job.findOne({ where: { id: jobId } });
+    const job = await Job.findOne({
+      where: { id: jobId },
+    });
 
     if (!job) {
       return res.status(404).json({
@@ -203,7 +241,27 @@ const getProposalsByJobId = async (req, res) => {
       });
     }
 
-    const proposals = await Proposal.findAll({ where: { jobId } });
+    const proposals = await Proposal.findAll({
+      where: { jobId },
+      include: [
+        {
+          model: db.Job,
+          attributes: ["id", "title", "budget", "description"],
+          as: "Job",
+        },
+
+        {
+          model: db.Freelancer,
+          attributes: ["id", "amountCredited", "skills"],
+          as: "Freelancer",
+          include: {
+            model: db.User,
+            attributes: ["id", "username", "email"],
+            as: "User",
+          },
+        },
+      ],
+    });
 
     res.status(200).json({
       success: true,
@@ -225,24 +283,26 @@ const updateProposalByID = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     const proposal = await Proposal.findByPk(id);
     if (!proposal) {
       return res
-      .status(404)
-      .json({ success: false, message: "Proposal not found" });
+        .status(404)
+        .json({ success: false, message: "Proposal not found" });
     }
-    
-    const prevProposalStatus = 'ACCEPTED';
+
+    const prevProposalStatus = "ACCEPTED";
     if (status) {
       proposal.status = status;
     }
 
     await proposal.save();
-    const freelancer = await Freelancer.findOne({ where : { id : proposal.freelancerId}});
-    const user = await User.findOne({ where : { id : freelancer.userId}});
+    const freelancer = await Freelancer.findOne({
+      where: { id: proposal.freelancerId },
+    });
+    const user = await User.findOne({ where: { id: freelancer.userId } });
     // Update the Escrow entry if the proposal status is ACCEPTED
-    if (proposal.status === 'ACCEPTED') {
+    if (proposal.status === "ACCEPTED") {
       const escrow = await Escrow.findOne({ where: { jobId: proposal.jobId } });
 
       if (!escrow) {
@@ -254,11 +314,13 @@ const updateProposalByID = async (req, res) => {
       escrow.freelancerId = proposal.freelancerId;
       escrow.freelancerWorkStatus = "STARTED";
       const escrowUpdated = await escrow.save();
-      console.log(`Accepted Freelancer ${proposal.freelancerId} Proposal and updated the Freelancerwork status to ${escrow.freelancerWorkStatus}`);
-      console.log('Escrow : ', escrowUpdated ); 
+      console.log(
+        `Accepted Freelancer ${proposal.freelancerId} Proposal and updated the Freelancerwork status to ${escrow.freelancerWorkStatus}`
+      );
+      console.log("Escrow : ", escrowUpdated);
     }
 
-    if (prevProposalStatus === 'ACCEPTED' &&  proposal.status === 'COMPLETED') {
+    if (prevProposalStatus === "ACCEPTED" && proposal.status === "COMPLETED") {
       const escrow = await Escrow.findOne({ where: { jobId: proposal.jobId } });
 
       if (!escrow) {
@@ -266,41 +328,43 @@ const updateProposalByID = async (req, res) => {
           .status(404)
           .json({ success: false, message: "Escrow not found for the job" });
       }
-     
-      console.log('Freelancer before : ', freelancer );
-      freelancer.amountCredited = (freelancer.amountCredited + proposal.charges)
-      
-      await freelancer.save();
-      console.log('Freelancer After : ', freelancer );
 
+      console.log("Freelancer before : ", freelancer);
+      freelancer.amountCredited = freelancer.amountCredited + proposal.charges;
+
+      await freelancer.save();
+      console.log("Freelancer After : ", freelancer);
 
       escrow.freelancerId = proposal.freelancerId;
       escrow.freelancerWorkStatus = "COMPLETED";
-      escrow.amount = ( escrow.amount - proposal.charges);
+      escrow.amount = escrow.amount - proposal.charges;
 
-      
       const job = await Job.findOne({ where: { id: proposal.jobId } });
       const client = await Client.findOne({ where: { id: job.clientId } });
-      client.totalFundingin$ = ( client.totalFundingin$ + escrow.amount );
+      client.totalFundingin$ = client.totalFundingin$ + escrow.amount;
 
-       const clientupdated = await client.save();
+      const clientupdated = await client.save();
       const escrowUpdated = await escrow.save();
-      console.log(`Completed Work! , Added Money to Freelancer Account ${freelancer.amountCredited} and Remaining Money to Client ${client.totalFundingin$}`);
-      
-      
+      console.log(
+        `Completed Work! , Added Money to Freelancer Account ${freelancer.amountCredited} and Remaining Money to Client ${client.totalFundingin$}`
+      );
 
-      console.log('Escrow : ', escrowUpdated ); 
-      console.log('ClientUpdated : ', clientupdated ); 
+      console.log("Escrow : ", escrowUpdated);
+      console.log("ClientUpdated : ", clientupdated);
     }
 
-    await sendEmail( 'Proposal Status Update', `Your proposal status has been updated to: ${proposal.status}` , user.email);
+    await sendEmail(
+      "Proposal Status Update",
+      `Your proposal status has been updated to: ${proposal.status}`,
+      user.email
+    );
 
     res.status(200).json({
-      success: true, 
+      success: true,
       message: "Proposals updated successfully",
       proposal,
     });
-  } catch (error) { 
+  } catch (error) {
     console.error("Error updating Proposal information:", error);
     res.status(500).json({
       success: false,

@@ -12,8 +12,6 @@ const createFreelancer = async (req, res) => {
 
     const userId = req.id;
 
-    console.log("skills : ", skills);
-
     if (!userId) {
       return res
         .status(400)
@@ -77,7 +75,13 @@ const createFreelancer = async (req, res) => {
 const getFreelancers = async (req, res) => {
   try {
     // Retrieve all Freelancers from the database
-    const freelancers = await Freelancer.findAll();
+    const freelancers = await Freelancer.findAll({
+      include : {
+        model: db.User,
+        attributes: ["id", "username", "email"],
+        as: "User",
+      }
+  });
     res.status(200).json({ success: true, freelancers });
   } catch (error) {
     console.error("Error fetching freelancers:", error);
@@ -92,7 +96,15 @@ const getFreelancerById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const freelancer = await Freelancer.findByPk(id);
+    const freelancer = await Freelancer.findOne({ where : { id } ,  
+      
+        include : {
+          model: db.User,
+          attributes: ["id", "username", "email"],
+          as: "User",
+        }
+    }
+    );
 
     if (!freelancer) {
       return res
@@ -117,7 +129,11 @@ const getFreelancerByUserId = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const freelancer = await Freelancer.findOne({ where: { userId } });
+    const freelancer = await Freelancer.findOne({ where: { userId } , include : {
+      model: db.User,
+      attributes: ["id", "username", "email"],
+      as: "User",
+    } });
 
     if (!freelancer) {
       return res.status(404).json({ success: false, message: "Freelancer not found for the given User ID" });

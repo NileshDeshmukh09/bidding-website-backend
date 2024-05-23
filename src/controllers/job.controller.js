@@ -103,8 +103,7 @@ const createJob = async (req, res) => {
     validateBudget(budget);
 
     if (budget && budget > client.totalFundingin$) {
-
-      console.log("budget-------- : ", typeof budget , typeof client.totalFundingin$);
+     
       return res.status(400).json({
         success: false,
         message: "Can't create a Job , Job Budget is Greater than Funding!",
@@ -144,8 +143,6 @@ const createJob = async (req, res) => {
 
       await client.save();
 
-      console.log("Client :", client);
-
       // Respond with success message and the created job
       res.status(201).json({
         success: true,
@@ -176,7 +173,24 @@ const createJob = async (req, res) => {
 // Get all jobs
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.findAll();
+    const jobs = await Job.findAll({
+      include: {
+        model: db.Client,
+        attributes: [
+          "id",
+          "companyName",
+          "companySize",
+          "websiteURL",
+          "totalFundingin$",
+        ],
+        as: "Client",
+        include: {
+          model: db.User,
+          attributes: ["id", "username", "email"],
+          as: "User",
+        },
+      },
+    });
     res.status(200).json({
       success: true,
       message: "Jobs fetched successfully",
@@ -198,7 +212,25 @@ const getJobById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const job = await Job.findByPk(id);
+    const job = await Job.findOne({
+      where: { id },
+      include: {
+        model: db.Client,
+        attributes: [
+          "id",
+          "companyName",
+          "companySize",
+          "websiteURL",
+          "totalFundingin$",
+        ],
+        as: "Client",
+        include: {
+          model: db.User,
+          attributes: ["id", "username", "email"],
+          as: "User",
+        },
+      },
+    });
 
     if (!job) {
       return res.status(404).json({ success: false, message: "Job not found" });
@@ -226,7 +258,35 @@ const getJobByClientID = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Client not found" });
     }
-    const jobs = await Job.findAll({ where: { clientId } });
+    const jobs = await Job.findAll({
+      where: { clientId },
+      include: [
+        {
+          model: db.Proposals,
+        attributes: [
+          "id",
+          "charges",
+        ],
+        as: "Proposals",
+
+        },
+        {
+        model: db.Client,
+        attributes: [
+          "id",
+          "companyName",
+          "companySize",
+          "websiteURL",
+          "totalFundingin$",
+        ],
+        as: "Client",
+        include: {
+          model: db.User,
+          attributes: ["id", "username", "email"],
+          as: "User",
+        },
+      },]
+    });
 
     res.status(200).json({
       success: true,

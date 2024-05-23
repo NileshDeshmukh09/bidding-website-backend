@@ -7,7 +7,7 @@ const User = db.User;
 // Create a new Client
 const createClient = async (req, res) => {
   try {
-    const { companyName, companySize, websiteURL , totalFundingin$ } = req.body;
+    const { companyName, companySize, websiteURL, totalFundingin$ } = req.body;
 
     const userId = req.id;
 
@@ -18,17 +18,15 @@ const createClient = async (req, res) => {
     }
 
     if (!companyName || !companySize) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "company name, and company size are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "company name, and company size are required",
+      });
     }
 
     // if( !totalFundingin$ ){
     //   return res.status(400).json({
-    //     success : false, 
+    //     success : false,
     //     message : "Oops! , You missed to enter the funded amount for the Company!"
     //   })
     // }
@@ -50,13 +48,10 @@ const createClient = async (req, res) => {
     }
 
     if (user.userType !== userTypes.client) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message:
-            "User must have userType 'CLIENT' to create a CLIENT profile",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "User must have userType 'CLIENT' to create a CLIENT profile",
+      });
     }
 
     if (!isValidCompanySize(companySize)) {
@@ -71,7 +66,7 @@ const createClient = async (req, res) => {
       userId,
       companyName,
       companySize,
-      websiteURL, 
+      websiteURL,
       totalFundingin$,
     });
 
@@ -91,7 +86,13 @@ const createClient = async (req, res) => {
 // Get all Clients
 const getAllClients = async (req, res) => {
   try {
-    const clients = await Client.findAll();
+    const clients = await Client.findAll({
+      include: {
+        model: db.User,
+        attributes: ["id", "username", "email"],
+        as: "User",
+      },
+    });
     res.status(200).json(clients);
   } catch (error) {
     console.error("Error fetching clients:", error);
@@ -106,7 +107,14 @@ const getClientById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const client = await Client.findByPk(id);
+    const client = await Client.findOne({
+      where: { id },
+      include: {
+        model: db.User,
+        attributes: ["id", "username", "email"],
+        as: "User",
+      },
+    });
 
     if (!client) {
       return res
@@ -165,10 +173,20 @@ const getClientByUserId = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const client = await Client.findOne({ where: { userId } });
+    const client = await Client.findOne({
+      where: { userId },
+      include: {
+        model: db.User,
+        attributes: ["id", "username", "email"],
+        as: "User",
+      },
+    });
 
     if (!client) {
-      return res.status(404).json({ success: false, message: "Client not found for the given User ID" });
+      return res.status(404).json({
+        success: false,
+        message: "Client not found for the given User ID",
+      });
     }
 
     res.status(200).json({ success: true, client });
@@ -178,11 +196,10 @@ const getClientByUserId = async (req, res) => {
   }
 };
 
- 
 module.exports = {
   createClient,
   getAllClients,
   getClientById,
   deleteClientById,
-  getClientByUserId
+  getClientByUserId,
 };

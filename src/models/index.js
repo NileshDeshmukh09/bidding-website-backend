@@ -45,6 +45,24 @@ db.Escrow.belongsTo(db.Freelancer, { foreignKey: "clientId" });
 db.Freelancer.hasMany(db.Escrow, { foreignKey: "freelancerId" });
 db.Escrow.belongsTo(db.Freelancer, { foreignKey: "freelancerId" });
 
+db.User.hasOne(db.Client, {
+  foreignKey: "userId",
+  as: "Client",
+});
+db.Client.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "User",
+});
+
+db.User.hasOne(db.Freelancer, {
+  foreignKey: "userId",
+  as: "Freelancer",
+});
+db.Freelancer.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "User",
+});
+
 db.Client.hasMany(db.Job, {
   foreignKey: "clientId",
   as: "Job",
@@ -61,6 +79,15 @@ db.Freelancer.hasMany(db.Proposals, {
 db.Proposals.belongsTo(db.Freelancer, {
   foreignKey: "freelancerId",
   as: "Freelancer",
+});
+
+db.Job.hasMany(db.Proposals, {
+  foreignKey: "jobId",
+  as: "Proposals",
+});
+db.Proposals.belongsTo(db.Job, {
+  foreignKey: "jobId",
+  as: "Job",
 });
 
 module.exports = { db };
