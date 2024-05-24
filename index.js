@@ -36,7 +36,7 @@ db.sequelize
     console.log("Failed to sync db: " + err);
   });
  
-
+console.log('Welcome to IndexJS of Bidding Backend !!')
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
